@@ -897,15 +897,15 @@
             });
         }
 
-        function createPowerChart(vendedoras, data) {
+  function createPowerChart(vendedoras, data) {
             const ctx = document.getElementById('powerChart');
             if (!ctx) return;
             
-            if (window.powerChart) window.powerChart.destroy();
+            if (powerChart) powerChart.destroy();
 
             const powers = data.map(function(v) { return v.power || 0; });
 
-            window.powerChart = new Chart(ctx, {
+            powerChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: vendedoras,
@@ -920,18 +920,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            labels: { color: '#fff', font: { size: 13 } } 
-                        } 
-                    },
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
                     scales: {
                         r: { 
-                            ticks: { 
-                                color: '#fff', 
-                                backdropColor: 'transparent', 
-                                font: { size: 11 } 
-                            },
+                            ticks: { color: '#fff', backdropColor: 'transparent', font: { size: 11 } },
                             grid: { color: 'rgba(255,255,255,0.2)' },
                             pointLabels: { color: '#fff', font: { size: 12 } }
                         }
