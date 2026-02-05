@@ -457,21 +457,21 @@
 
             <!-- Card 6: Resultado Mensual -->
             <div class="card">
-                <div class="card-title">💵 Resultado Mensual</div>
-                <div class="card-value" id="resultado-total">$0</div>
-                <div class="card-subtitle">Ingresos del mes</div>
+                <div class="card-title">📦 Pedidos Mensuales</div>
+                <div class="card-value" id="resultado-total">0</div>
+                <div class="card-subtitle">Total de pedidos del mes</div>
                 <div class="business-breakdown">
                     <div class="business-item todo">
                         <span class="business-name">Todo para Revender</span>
-                        <span class="business-value" id="resultado-todo">$0</span>
+                        <span class="business-value" id="resultado-todo">0</span>
                     </div>
                     <div class="business-item caribe">
                         <span class="business-name">Caribe Beachwear</span>
-                        <span class="business-value" id="resultado-caribe">$0</span>
+                        <span class="business-value" id="resultado-caribe">0</span>
                     </div>
                     <div class="business-item pijama">
                         <span class="business-name">Pijama de Seda</span>
-                        <span class="business-value" id="resultado-pijama">$0</span>
+                        <span class="business-value" id="resultado-pijama">0</span>
                     </div>
                 </div>
             </div>
@@ -716,15 +716,11 @@
             document.getElementById('conversion-caribe').textContent = convCaribe + '%';
             document.getElementById('conversion-pijama').textContent = convPijama + '%';
 
-            // Card 6: Resultado Mensual
-            const resultadoTotal = data.totais.vendas * 1500; // Valor médio por venda
-            document.getElementById('resultado-total').textContent = '$' + resultadoTotal.toLocaleString();
-            document.getElementById('resultado-todo').textContent = 
-                '$' + businessData['Todo para Revender'].resultado.toLocaleString();
-            document.getElementById('resultado-caribe').textContent = 
-                '$' + businessData['Caribe Beachwear'].resultado.toLocaleString();
-            document.getElementById('resultado-pijama').textContent = 
-                '$' + businessData['Pijama de Seda'].resultado.toLocaleString();
+            // Card 6: Pedidos Mensuales (quantidade de vendas/pedidos)
+            document.getElementById('resultado-total').textContent = data.totais.vendas;
+            document.getElementById('resultado-todo').textContent = businessData['Todo para Revender'].vendas;
+            document.getElementById('resultado-caribe').textContent = businessData['Caribe Beachwear'].vendas;
+            document.getElementById('resultado-pijama').textContent = businessData['Pijama de Seda'].vendas;
 
             // Preparar dados para gráficos
             const vendedoras = data.vendedoras.map(function(v) { return v.nome; });
@@ -732,17 +728,34 @@
             const metas = data.vendedoras.map(function(v) { return v.meta; });
             const atendimentos = data.vendedoras.map(function(v) { return v.atendimentos || 0; });
 
+            console.log('Chamando funções de gráficos...'); // Debug
+
             // Atualizar todos os gráficos e tabelas
             createVendasChart(vendedoras, vendas, metas);
+            console.log('✓ createVendasChart executado'); // Debug
+            
             createRankingTable(data.vendedoras);
+            console.log('✓ createRankingTable executado'); // Debug
+            
             createDetalhesTable(data.vendedoras);
+            console.log('✓ createDetalhesTable executado'); // Debug
+            
             createMetricsChart(vendedoras, atendimentos, vendas);
+            console.log('✓ createMetricsChart executado'); // Debug
+            
             createPowerChart(vendedoras, data.vendedoras);
+            console.log('✓ createPowerChart executado'); // Debug
             
             // Atualizar tabela de resort se existir
             if (data.rankingResort && data.rankingResort.length > 0) {
+                console.log('Dados de resort encontrados:', data.rankingResort); // Debug
                 createResortTable(data.rankingResort);
+                console.log('✓ createResortTable executado'); // Debug
+            } else {
+                console.log('⚠ Dados de resort não encontrados ou vazios'); // Debug
             }
+            
+            console.log('Todos os gráficos e tabelas atualizados!'); // Debug
         }
 
         function createVendasChart(vendedoras, vendas, metas) {
@@ -837,15 +850,21 @@
 
         function createMetricsChart(vendedoras, atendimentos, vendas) {
             const ctx = document.getElementById('metricsChart');
-            if (!ctx) return;
+            console.log('createMetricsChart chamado - ctx:', ctx); // Debug
+            if (!ctx) {
+                console.error('Canvas metricsChart não encontrado!');
+                return;
+            }
             
-            if (window.metricsChart) window.metricsChart.destroy();
+            if (metricsChart) metricsChart.destroy();
 
             const conversoes = atendimentos.map(function(at, i) {
                 return at > 0 ? ((vendas[i] / at) * 100).toFixed(2) : 0;
             });
 
-            window.metricsChart = new Chart(ctx, {
+            console.log('Dados Metrics:', { vendedoras, atendimentos, conversoes }); // Debug
+
+            metricsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: vendedoras,
@@ -897,13 +916,18 @@
             });
         }
 
-  function createPowerChart(vendedoras, data) {
+        function createPowerChart(vendedoras, data) {
             const ctx = document.getElementById('powerChart');
-            if (!ctx) return;
+            console.log('createPowerChart chamado - ctx:', ctx); // Debug
+            if (!ctx) {
+                console.error('Canvas powerChart não encontrado!');
+                return;
+            }
             
             if (powerChart) powerChart.destroy();
 
             const powers = data.map(function(v) { return v.power || 0; });
+            console.log('Dados Power:', { vendedoras, powers }); // Debug
 
             powerChart = new Chart(ctx, {
                 type: 'radar',
@@ -920,10 +944,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
+                    plugins: { 
+                        legend: { 
+                            labels: { color: '#fff', font: { size: 13 } } 
+                        } 
+                    },
                     scales: {
                         r: { 
-                            ticks: { color: '#fff', backdropColor: 'transparent', font: { size: 11 } },
+                            ticks: { 
+                                color: '#fff', 
+                                backdropColor: 'transparent', 
+                                font: { size: 11 } 
+                            },
                             grid: { color: 'rgba(255,255,255,0.2)' },
                             pointLabels: { color: '#fff', font: { size: 12 } }
                         }
@@ -934,7 +966,11 @@
 
         function createResortTable(ranking) {
             const tbody = document.querySelector('#resort-table tbody');
-            if (!tbody) return;
+            console.log('createResortTable chamado - tbody:', tbody, 'ranking:', ranking); // Debug
+            if (!tbody) {
+                console.error('Tabela resort-table tbody não encontrada!');
+                return;
+            }
             
             tbody.innerHTML = '';
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'];
@@ -947,6 +983,8 @@
                     '<td>' + item.pontos + '</td>' +
                     '</tr>';
             });
+            
+            console.log('Tabela resort preenchida com', ranking.length, 'itens'); // Debug
         }
 
         // Auto-carregar se já configurado
