@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Caribe Beach Wear - TV</title>
+    <title>Dashboard Caribe Beachwear - TV</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
@@ -19,6 +19,20 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            font-size: 16px; /* Base font size */
+        }
+
+        /* Responsivo baseado no tamanho da tela */
+        @media (min-width: 1920px) {
+            body { font-size: 20px; } /* TV Full HD */
+        }
+
+        @media (min-width: 2560px) {
+            body { font-size: 24px; } /* TV 2K/4K */
+        }
+
+        @media (min-width: 3840px) {
+            body { font-size: 32px; } /* TV 4K+ */
         }
 
         .tv-container {
@@ -51,7 +65,7 @@
         }
 
         h1 {
-            font-size: 1.8em;
+            font-size: 2.2em; /* Aumentado de 1.8em */
             background: linear-gradient(45deg, #00d4ff, #00ff88);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -62,13 +76,14 @@
             display: flex;
             gap: 15px;
             align-items: center;
-            font-size: 0.85em;
+            font-size: 0.95em; /* Aumentado de 0.85em */
         }
 
         .status-badge {
-            padding: 5px 12px;
+            padding: 6px 14px; /* Aumentado */
             border-radius: 15px;
-            font-size: 0.85em;
+            font-size: 0.95em; /* Aumentado de 0.85em */
+            font-weight: 600;
         }
 
         .badge-success { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
@@ -91,21 +106,22 @@
         }
 
         .card-title {
-            font-size: 0.75em;
+            font-size: 0.85em; /* Aumentado de 0.75em */
             color: #aaa;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .card-value {
-            font-size: 2em;
+            font-size: 2.8em; /* Aumentado de 2em */
             font-weight: bold;
             margin-bottom: 5px;
         }
 
         .card-subtitle {
-            font-size: 0.75em;
+            font-size: 0.85em; /* Aumentado de 0.75em */
             color: #888;
         }
 
@@ -138,39 +154,40 @@
         }
 
         .block-title {
-            font-size: 1em;
+            font-size: 1.15em; /* Aumentado de 1em */
             margin-bottom: 12px;
             color: #00d4ff;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
 
         /* Tabelas compactas */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.75em;
+            font-size: 0.9em; /* Aumentado de 0.75em */
         }
 
         th {
             background: rgba(0, 212, 255, 0.15);
-            padding: 6px 8px;
+            padding: 8px 10px; /* Aumentado de 6px 8px */
             text-align: left;
             font-weight: 600;
             color: #00d4ff;
-            font-size: 0.85em;
+            font-size: 0.95em; /* Aumentado de 0.85em */
             border-bottom: 1px solid rgba(0, 212, 255, 0.3);
         }
 
         td {
-            padding: 6px 8px;
+            padding: 8px 10px; /* Aumentado de 6px 8px */
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .medal {
-            font-size: 1.1em;
-            margin-right: 3px;
+            font-size: 1.3em; /* Aumentado de 1.1em */
+            margin-right: 5px;
         }
 
         /* Gráficos compactos */
@@ -566,10 +583,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 10 } } } },
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } }, /* Aumentado de 10 */
                     scales: {
-                        y: { beginAtZero: true, ticks: { color: '#fff', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        x: { ticks: { color: '#fff', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                        y: { beginAtZero: true, ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } }, /* Aumentado de 9 */
+                        x: { ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } } /* Aumentado de 9 */
                     }
                 }
             });
@@ -670,11 +687,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 10 } } } },
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
                     scales: {
-                        y: { type: 'linear', position: 'left', ticks: { color: '#fff', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y1: { type: 'linear', position: 'right', ticks: { color: '#fff', font: { size: 9 } }, grid: { drawOnChartArea: false } },
-                        x: { ticks: { color: '#fff', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                        y: { type: 'linear', position: 'left', ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y1: { type: 'linear', position: 'right', ticks: { color: '#fff', font: { size: 12 } }, grid: { drawOnChartArea: false } },
+                        x: { ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } }
                     }
                 }
             });
@@ -703,12 +720,12 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 10 } } } },
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
                     scales: {
                         r: { 
-                            ticks: { color: '#fff', backdropColor: 'transparent', font: { size: 8 } },
+                            ticks: { color: '#fff', backdropColor: 'transparent', font: { size: 11 } },
                             grid: { color: 'rgba(255,255,255,0.2)' },
-                            pointLabels: { color: '#fff', font: { size: 9 } }
+                            pointLabels: { color: '#fff', font: { size: 12 } }
                         }
                     }
                 }
@@ -741,3 +758,4 @@
     </script>
 </body>
 </html>
+
