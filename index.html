@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,35 +19,33 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            font-size: 16px; /* Base font size */
+            font-size: 16px;
         }
 
-        /* Responsivo baseado no tamanho da tela */
         @media (min-width: 1920px) {
-            body { font-size: 20px; } /* TV Full HD */
+            body { font-size: 20px; }
         }
 
         @media (min-width: 2560px) {
-            body { font-size: 24px; } /* TV 2K/4K */
+            body { font-size: 24px; }
         }
 
         @media (min-width: 3840px) {
-            body { font-size: 32px; } /* TV 4K+ */
+            body { font-size: 32px; }
         }
 
         .tv-container {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: auto 1fr 1fr;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto 1fr;
             gap: 10px;
             padding: 10px;
             height: 100vh;
             width: 100vw;
         }
 
-        /* Header ocupa toda a largura */
+        /* Header */
         header {
-            grid-column: 1 / -1;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             padding: 15px 20px;
@@ -65,7 +63,7 @@
         }
 
         h1 {
-            font-size: 2.2em; /* Aumentado de 1.8em */
+            font-size: 2.2em;
             background: linear-gradient(45deg, #00d4ff, #00ff88);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -76,37 +74,38 @@
             display: flex;
             gap: 15px;
             align-items: center;
-            font-size: 0.95em; /* Aumentado de 0.85em */
+            font-size: 0.95em;
         }
 
         .status-badge {
-            padding: 6px 14px; /* Aumentado */
+            padding: 6px 14px;
             border-radius: 15px;
-            font-size: 0.95em; /* Aumentado de 0.85em */
+            font-size: 0.95em;
             font-weight: 600;
         }
 
         .badge-success { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
         .badge-info { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
 
-        /* Cards de resumo - primeira linha */
+        /* Grid de 6 tarjetas */
         .cards-grid {
-            grid-column: 1 / -1;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
         }
 
         .card {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
-            padding: 15px;
+            padding: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .card-title {
-            font-size: 0.85em; /* Aumentado de 0.75em */
+            font-size: 0.8em;
             color: #aaa;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -115,14 +114,49 @@
         }
 
         .card-value {
-            font-size: 2.8em; /* Aumentado de 2em */
+            font-size: 2.5em;
             font-weight: bold;
             margin-bottom: 5px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .card-subtitle {
-            font-size: 0.85em; /* Aumentado de 0.75em */
+            font-size: 0.75em;
             color: #888;
+            margin-bottom: 8px;
+        }
+
+        .business-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 0.7em;
+        }
+
+        .business-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            border-left: 2px solid;
+        }
+
+        .business-item.todo { border-left-color: #ff6b6b; }
+        .business-item.caribe { border-left-color: #4ecdc4; }
+        .business-item.pijama { border-left-color: #ffd93d; }
+
+        .business-name {
+            color: #ccc;
+        }
+
+        .business-value {
+            color: #fff;
+            font-weight: 600;
         }
 
         .progress-bar {
@@ -141,7 +175,14 @@
             border-radius: 2px;
         }
 
-        /* Blocos principais */
+        /* Blocos inferiores */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            overflow: hidden;
+        }
+
         .block {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
@@ -154,7 +195,7 @@
         }
 
         .block-title {
-            font-size: 1.15em; /* Aumentado de 1em */
+            font-size: 1.15em;
             margin-bottom: 12px;
             color: #00d4ff;
             display: flex;
@@ -163,34 +204,34 @@
             font-weight: 600;
         }
 
-        /* Tabelas compactas */
+        /* Tabelas */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9em; /* Aumentado de 0.75em */
+            font-size: 0.9em;
         }
 
         th {
             background: rgba(0, 212, 255, 0.15);
-            padding: 8px 10px; /* Aumentado de 6px 8px */
+            padding: 8px 10px;
             text-align: left;
             font-weight: 600;
             color: #00d4ff;
-            font-size: 0.95em; /* Aumentado de 0.85em */
+            font-size: 0.95em;
             border-bottom: 1px solid rgba(0, 212, 255, 0.3);
         }
 
         td {
-            padding: 8px 10px; /* Aumentado de 6px 8px */
+            padding: 8px 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .medal {
-            font-size: 1.3em; /* Aumentado de 1.1em */
+            font-size: 1.3em;
             margin-right: 5px;
         }
 
-        /* Gráficos compactos */
+        /* Gráficos */
         .chart-wrapper {
             flex: 1;
             position: relative;
@@ -201,7 +242,7 @@
             max-height: 100% !important;
         }
 
-        /* Config panel oculto por padrão */
+        /* Config panel */
         .config-panel {
             position: fixed;
             top: 50%;
@@ -227,148 +268,225 @@
             font-size: 1em;
         }
 
-        .btn {
+        .config-panel button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
             background: linear-gradient(45deg, #00d4ff, #00ff88);
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            color: #1e1e2e;
-            font-weight: bold;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 600;
+            font-size: 1em;
             cursor: pointer;
-            font-size: 0.95em;
-            margin: 8px 5px;
+            transition: transform 0.2s;
         }
 
-        .btn:hover {
-            opacity: 0.9;
+        .config-panel button:hover {
+            transform: scale(1.02);
         }
 
         .hidden {
             display: none !important;
         }
 
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            padding: 40px;
-            background: rgba(30, 30, 46, 0.95);
-            border-radius: 15px;
-            font-size: 1.2em;
-            color: #00d4ff;
-            z-index: 999;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .loading {
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Scroll compacto para tabelas se necessário */
-        .table-scroll {
-            overflow-y: auto;
-            max-height: 100%;
-        }
-
-        .table-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .table-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .table-scroll::-webkit-scrollbar-thumb {
-            background: rgba(0, 212, 255, 0.5);
-            border-radius: 2px;
-        }
-
-        /* Timer de atualização */
-        .refresh-timer {
-            font-size: 0.75em;
+        .refresh-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
             color: #888;
+        }
+
+        .countdown {
+            background: rgba(0, 212, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: #00d4ff;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div id="loading" class="loading hidden">
-        🔄 Carregando dados...
-    </div>
-
+    <!-- Panel de Configuración -->
     <div id="config-panel" class="config-panel">
-        <h2 style="color: #00d4ff; margin-bottom: 15px;">⚙️ Configuração Inicial</h2>
-        <p style="font-size: 0.9em; color: #aaa; margin-bottom: 15px;">
-            Cole a URL da API do Google Apps Script:
+        <h2 style="color: #00d4ff; margin-bottom: 20px;">⚙️ Configuración del Dashboard</h2>
+        <div>
+            <label style="color: #aaa;">URL de la API:</label>
+            <input type="text" id="api-url-input" placeholder="https://probiz.chat/api/dashboard">
+        </div>
+        <div>
+            <label style="color: #aaa;">Intervalo de actualización (segundos):</label>
+            <input type="number" id="refresh-interval-input" value="60" min="10" max="600">
+        </div>
+        <button onclick="saveConfig()">💾 Guardar y Activar</button>
+        <p style="margin-top: 15px; color: #888; font-size: 0.9em; text-align: center;">
+            Presiona 'C' en cualquier momento para abrir esta configuración
         </p>
-        <input type="url" id="api-url" placeholder="https://script.google.com/macros/s/.../exec" />
-        <button class="btn" onclick="saveApiUrl()">💾 Salvar e Iniciar</button>
     </div>
 
+    <!-- Dashboard Principal -->
     <div id="tv-dashboard" class="tv-container hidden">
-        <!-- Header -->
         <header>
             <div class="header-left">
-                <h1>🏖️ Caribe Beach Wear</h1>
+                <h1>🏖️ Dashboard Caribe Beachwear</h1>
                 <div class="status-info">
-                    <span id="data-source" class="status-badge badge-info">●</span>
-                    <span id="last-update" style="color: #888;">--:--:--</span>
-                    <span id="next-update" class="refresh-timer">Próxima atualização em 10min</span>
+                    <span class="status-badge badge-success">● En Vivo</span>
+                    <span class="status-badge badge-info" id="last-update">Actualizando...</span>
                 </div>
             </div>
-            <div>
-                <button class="btn" onclick="loadData()" style="padding: 8px 20px; font-size: 0.85em;">🔄</button>
+            <div class="refresh-info">
+                <span>🔄 Próxima actualización en:</span>
+                <span class="countdown" id="countdown">--</span>
             </div>
         </header>
 
-        <!-- Cards de Resumo -->
+        <!-- 6 Tarjetas Principales -->
         <div class="cards-grid">
+            <!-- Card 1: Ventas Generales -->
             <div class="card">
-                <div class="card-title">💰 Vendas da Semana</div>
-                <div class="card-value" id="vendas-total">0</div>
-                <div class="card-subtitle">Meta: <span id="meta-total">0</span> (<span id="percentual-vendas">0%</span>)</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-vendas" style="width: 0%"></div>
+                <div class="card-title">💰 Ventas Totales</div>
+                <div class="card-value" id="ventas-totales">0</div>
+                <div class="card-subtitle">Ventas del período</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="ventas-todo">0</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="ventas-caribe">0</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="ventas-pijama">0</span>
+                    </div>
                 </div>
             </div>
 
+            <!-- Card 2: Meta General -->
             <div class="card">
-                <div class="card-title">📞 Atendimentos</div>
-                <div class="card-value" id="atendimentos-total">0</div>
-                <div class="card-subtitle">Total de contatos</div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">🎯 Conversão</div>
-                <div class="card-value" id="conversao-total">0%</div>
-                <div class="card-subtitle">Atendimentos → Vendas</div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">📈 Projeção Semanal</div>
-                <div class="card-value" id="projecao-semanal">0</div>
-                <div class="card-subtitle"><span id="percentual-projecao">0%</span> da meta</div>
+                <div class="card-title">🎯 Meta General</div>
+                <div class="card-value" id="meta-total">0</div>
+                <div class="card-subtitle" id="percentual-meta">0% alcanzado</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="meta-todo">0</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="meta-caribe">0</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="meta-pijama">0</span>
+                    </div>
+                </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progress-projecao" style="width: 0%"></div>
+                    <div class="progress-fill" id="progress-meta"></div>
+                </div>
+            </div>
+
+            <!-- Card 3: Proyección Semanal -->
+            <div class="card">
+                <div class="card-title">📈 Proyección Semanal</div>
+                <div class="card-value" id="proyeccion-total">0</div>
+                <div class="card-subtitle" id="percentual-proyeccion">0% de la meta</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="proyeccion-todo">0</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="proyeccion-caribe">0</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="proyeccion-pijama">0</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-proyeccion"></div>
+                </div>
+            </div>
+
+            <!-- Card 4: Atenciones Totales -->
+            <div class="card">
+                <div class="card-title">👥 Atenciones</div>
+                <div class="card-value" id="atenciones-totales">0</div>
+                <div class="card-subtitle">Clientes atendidos</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="atenciones-todo">0</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="atenciones-caribe">0</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="atenciones-pijama">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Conversión -->
+            <div class="card">
+                <div class="card-title">✨ Conversión</div>
+                <div class="card-value" id="conversion-total">0%</div>
+                <div class="card-subtitle">Tasa de conversión</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="conversion-todo">0%</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="conversion-caribe">0%</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="conversion-pijama">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Resultado Mensual -->
+            <div class="card">
+                <div class="card-title">💵 Resultado Mensual</div>
+                <div class="card-value" id="resultado-total">$0</div>
+                <div class="card-subtitle">Ingresos del mes</div>
+                <div class="business-breakdown">
+                    <div class="business-item todo">
+                        <span class="business-name">Todo para Revender</span>
+                        <span class="business-value" id="resultado-todo">$0</span>
+                    </div>
+                    <div class="business-item caribe">
+                        <span class="business-name">Caribe Beachwear</span>
+                        <span class="business-value" id="resultado-caribe">$0</span>
+                    </div>
+                    <div class="business-item pijama">
+                        <span class="business-name">Pijama de Seda</span>
+                        <span class="business-value" id="resultado-pijama">$0</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Bloco 1: Ranking Vendas -->
-        <div class="block">
-            <div class="block-title">🏆 Ranking de Vendas</div>
-            <div class="table-scroll">
+        <!-- Bloques inferiores -->
+        <div class="bottom-grid">
+            <!-- Ranking de Vendedoras -->
+            <div class="block">
+                <div class="block-title">🏆 Ranking de Ventas</div>
                 <table id="ranking-table">
                     <thead>
                         <tr>
                             <th>Pos</th>
-                            <th>Nome</th>
-                            <th>Vendas</th>
+                            <th>Colaboradora</th>
+                            <th>Ventas</th>
                             <th>Meta</th>
                             <th>%</th>
                         </tr>
@@ -376,45 +494,26 @@
                     <tbody></tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Bloco 2: Gráfico Vendas -->
-        <div class="block">
-            <div class="block-title">📊 Vendas X Meta</div>
-            <div class="chart-wrapper">
-                <canvas id="vendasChart"></canvas>
+            <!-- Gráfico de Ventas vs Meta -->
+            <div class="block">
+                <div class="block-title">📊 Ventas vs Meta</div>
+                <div class="chart-wrapper">
+                    <canvas id="vendasChart"></canvas>
+                </div>
             </div>
-        </div>
 
-        <!-- Bloco 3: Ranking Resort -->
-        <div class="block">
-            <div class="block-title">🏝️ Ranking Resort - Dia 28</div>
-            <div class="table-scroll">
-                <table id="resort-table">
-                    <thead>
-                        <tr>
-                            <th>Pos</th>
-                            <th>Colaboradora</th>
-                            <th>Pontos</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Bloco 4: Performance Detalhada -->
-        <div class="block">
-            <div class="block-title">👥 Performance Power</div>
-            <div class="table-scroll">
+            <!-- Detalles de Performance -->
+            <div class="block">
+                <div class="block-title">⚡ Performance Detallada</div>
                 <table id="detalhes-table">
                     <thead>
                         <tr>
                             <th>Pos</th>
-                            <th>Nome</th>
-                            <th>Vendas</th>
+                            <th>Colaboradora</th>
+                            <th>Ventas</th>
                             <th>Power</th>
-                            <th>Conv.</th>
+                            <th>Conv</th>
                             <th>Calidad</th>
                         </tr>
                     </thead>
@@ -422,138 +521,171 @@
                 </table>
             </div>
         </div>
-
-        <!-- Bloco 5: Gráfico Atendimentos -->
-        <div class="block">
-            <div class="block-title">📈 Atendimentos X Conversão</div>
-            <div class="chart-wrapper">
-                <canvas id="metricsChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Bloco 6: Gráfico Power Radar -->
-        <div class="block">
-            <div class="block-title">⚡ Power Radar</div>
-            <div class="chart-wrapper">
-                <canvas id="powerChart"></canvas>
-            </div>
-        </div>
     </div>
 
     <script>
         let vendasChart = null;
-        let metricsChart = null;
-        let powerChart = null;
         let autoRefreshInterval = null;
         let countdownInterval = null;
-        let secondsUntilRefresh = 600; // 10 minutos
+        let refreshSeconds = 60;
 
-        function saveApiUrl() {
-            const url = document.getElementById('api-url').value.trim();
-            if (url) {
-                localStorage.setItem('dashboard_api_url', url);
-                document.getElementById('config-panel').classList.add('hidden');
-                document.getElementById('tv-dashboard').classList.remove('hidden');
-                loadData();
-                startAutoRefresh();
-            } else {
-                alert('❌ Insira uma URL válida');
-            }
-        }
+        function saveConfig() {
+            const apiUrl = document.getElementById('api-url-input').value.trim();
+            const interval = parseInt(document.getElementById('refresh-interval-input').value);
 
-        function startAutoRefresh() {
-            // Atualizar a cada 10 minutos
-            autoRefreshInterval = setInterval(loadData, 600000);
-            
-            // Countdown visual
-            secondsUntilRefresh = 600;
-            countdownInterval = setInterval(function() {
-                secondsUntilRefresh--;
-                if (secondsUntilRefresh <= 0) {
-                    secondsUntilRefresh = 600;
-                }
-                const minutes = Math.floor(secondsUntilRefresh / 60);
-                const seconds = secondsUntilRefresh % 60;
-                document.getElementById('next-update').textContent = 
-                    'Próxima atualização em ' + minutes + 'min ' + seconds + 's';
-            }, 1000);
-        }
-
-        async function loadData() {
-            const apiUrl = localStorage.getItem('dashboard_api_url');
-            
             if (!apiUrl) {
-                document.getElementById('config-panel').classList.remove('hidden');
+                alert('Por favor, ingrese una URL válida');
                 return;
             }
 
-            try {
-                document.getElementById('loading').classList.remove('hidden');
-                updateStatus('Carregando...', 'info');
-                
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                
-                const data = await response.json();
-                if (data.status === 'error') throw new Error(data.message);
-                
-                processData(data);
-                
-                const now = new Date();
-                document.getElementById('last-update').textContent = now.toLocaleTimeString('pt-BR');
-                updateStatus('✅', 'success');
-                
-                document.getElementById('loading').classList.add('hidden');
-                secondsUntilRefresh = 600; // Reset countdown
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                updateStatus('❌', 'danger');
-                document.getElementById('loading').innerHTML = 
-                    '<div style="padding: 30px; background: rgba(255,82,82,0.1); border-radius: 15px;">' +
-                    '<h3 style="color: #ff5252; margin-bottom: 15px;">❌ Erro</h3>' +
-                    '<p style="color: #aaa;">' + error.message + '</p>' +
-                    '<button class="btn" onclick="loadData()" style="margin-top: 15px;">🔄 Tentar Novamente</button>' +
-                    '</div>';
+            if (interval < 10 || interval > 600) {
+                alert('El intervalo debe estar entre 10 y 600 segundos');
+                return;
             }
+
+            localStorage.setItem('dashboard_api_url', apiUrl);
+            localStorage.setItem('dashboard_refresh_interval', interval);
+            refreshSeconds = interval;
+
+            document.getElementById('config-panel').classList.add('hidden');
+            document.getElementById('tv-dashboard').classList.remove('hidden');
+
+            loadData();
+            startAutoRefresh();
         }
 
-        function updateStatus(message, type) {
-            const badge = document.getElementById('data-source');
-            badge.textContent = message;
-            badge.className = 'status-badge badge-' + type;
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            let countdown = refreshSeconds;
+            
+            countdownInterval = setInterval(function() {
+                countdown--;
+                if (countdown <= 0) countdown = refreshSeconds;
+                document.getElementById('countdown').textContent = countdown + 's';
+            }, 1000);
+
+            autoRefreshInterval = setInterval(function() {
+                loadData();
+                countdown = refreshSeconds;
+            }, refreshSeconds * 1000);
         }
 
-        function processData(data) {
+        function loadData() {
+            const apiUrl = localStorage.getItem('dashboard_api_url');
+            
+            fetch(apiUrl)
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    updateDashboard(data);
+                    const now = new Date();
+                    document.getElementById('last-update').textContent = 
+                        now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                })
+                .catch(function(error) {
+                    console.error('Error al cargar datos:', error);
+                    document.getElementById('last-update').textContent = '❌ Error';
+                });
+        }
+
+        function updateDashboard(data) {
+            if (!data || !data.totais || !data.vendedoras) return;
+
+            // Mapear vendedoras por negocio
+            const businessMap = {
+                'Todo para Revender': ['Steisy', 'Nicole'],
+                'Caribe Beachwear': ['Yendri', 'Ianny'],
+                'Pijama de Seda': ['Wennifer', 'Maibeth']
+            };
+
+            // Calcular totais por negócio
+            const businessData = {
+                'Todo para Revender': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 },
+                'Caribe Beachwear': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 },
+                'Pijama de Seda': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 }
+            };
+
+            data.vendedoras.forEach(function(v) {
+                for (let business in businessMap) {
+                    if (businessMap[business].includes(v.nome)) {
+                        businessData[business].vendas += v.vendas || 0;
+                        businessData[business].meta += v.meta || 0;
+                        businessData[business].atenciones += v.atendimentos || 0;
+                        businessData[business].resultado += (v.vendas || 0) * 1000; // Ejemplo multiplicador
+                    }
+                }
+            });
+
+            // Card 1: Ventas Totales
+            document.getElementById('ventas-totales').textContent = data.totais.vendas;
+            document.getElementById('ventas-todo').textContent = businessData['Todo para Revender'].vendas;
+            document.getElementById('ventas-caribe').textContent = businessData['Caribe Beachwear'].vendas;
+            document.getElementById('ventas-pijama').textContent = businessData['Pijama de Seda'].vendas;
+
+            // Card 2: Meta General
+            document.getElementById('meta-total').textContent = data.totais.meta;
+            const percMeta = ((data.totais.vendas / data.totais.meta) * 100).toFixed(1);
+            document.getElementById('percentual-meta').textContent = percMeta + '% alcanzado';
+            document.getElementById('progress-meta').style.width = Math.min(percMeta, 100) + '%';
+            document.getElementById('meta-todo').textContent = businessData['Todo para Revender'].meta;
+            document.getElementById('meta-caribe').textContent = businessData['Caribe Beachwear'].meta;
+            document.getElementById('meta-pijama').textContent = businessData['Pijama de Seda'].meta;
+
+            // Card 3: Proyección Semanal
+            const proyeccionTotal = Math.round((data.totais.vendas / 3) * 7);
+            document.getElementById('proyeccion-total').textContent = proyeccionTotal;
+            const percProj = ((proyeccionTotal / data.totais.meta) * 100).toFixed(1);
+            document.getElementById('percentual-proyeccion').textContent = percProj + '% de la meta';
+            document.getElementById('progress-proyeccion').style.width = Math.min(percProj, 100) + '%';
+            
+            document.getElementById('proyeccion-todo').textContent = 
+                Math.round((businessData['Todo para Revender'].vendas / 3) * 7);
+            document.getElementById('proyeccion-caribe').textContent = 
+                Math.round((businessData['Caribe Beachwear'].vendas / 3) * 7);
+            document.getElementById('proyeccion-pijama').textContent = 
+                Math.round((businessData['Pijama de Seda'].vendas / 3) * 7);
+
+            // Card 4: Atenciones
+            document.getElementById('atenciones-totales').textContent = data.totais.atendimentos;
+            document.getElementById('atenciones-todo').textContent = businessData['Todo para Revender'].atenciones;
+            document.getElementById('atenciones-caribe').textContent = businessData['Caribe Beachwear'].atenciones;
+            document.getElementById('atenciones-pijama').textContent = businessData['Pijama de Seda'].atenciones;
+
+            // Card 5: Conversión
+            const convTotal = data.totais.conversion || 
+                ((data.totais.vendas / data.totais.atendimentos) * 100).toFixed(1);
+            document.getElementById('conversion-total').textContent = convTotal + '%';
+            
+            const convTodo = businessData['Todo para Revender'].atenciones > 0 ?
+                ((businessData['Todo para Revender'].vendas / businessData['Todo para Revender'].atenciones) * 100).toFixed(1) : 0;
+            const convCaribe = businessData['Caribe Beachwear'].atenciones > 0 ?
+                ((businessData['Caribe Beachwear'].vendas / businessData['Caribe Beachwear'].atenciones) * 100).toFixed(1) : 0;
+            const convPijama = businessData['Pijama de Seda'].atenciones > 0 ?
+                ((businessData['Pijama de Seda'].vendas / businessData['Pijama de Seda'].atenciones) * 100).toFixed(1) : 0;
+            
+            document.getElementById('conversion-todo').textContent = convTodo + '%';
+            document.getElementById('conversion-caribe').textContent = convCaribe + '%';
+            document.getElementById('conversion-pijama').textContent = convPijama + '%';
+
+            // Card 6: Resultado Mensual (exemplo com valores formatados)
+            const resultadoTotal = data.totais.vendas * 1500; // Valor médio por venda
+            document.getElementById('resultado-total').textContent = '$' + resultadoTotal.toLocaleString();
+            document.getElementById('resultado-todo').textContent = 
+                '$' + (businessData['Todo para Revender'].vendas * 1500).toLocaleString();
+            document.getElementById('resultado-caribe').textContent = 
+                '$' + (businessData['Caribe Beachwear'].vendas * 1500).toLocaleString();
+            document.getElementById('resultado-pijama').textContent = 
+                '$' + (businessData['Pijama de Seda'].vendas * 1500).toLocaleString();
+
+            // Atualizar gráficos e tabelas
             const vendedoras = data.vendedoras.map(function(v) { return v.nome; });
             const vendas = data.vendedoras.map(function(v) { return v.vendas; });
             const metas = data.vendedoras.map(function(v) { return v.meta; });
-            const atendimentos = data.vendedoras.map(function(v) { return v.atendimentos; });
-
-            // Atualizar cards
-            document.getElementById('vendas-total').textContent = data.totais.vendas;
-            document.getElementById('meta-total').textContent = data.totais.meta;
-            document.getElementById('percentual-vendas').textContent = data.totais.percentual + '%';
-            document.getElementById('progress-vendas').style.width = Math.min(data.totais.percentual, 100) + '%';
-
-            document.getElementById('atendimentos-total').textContent = data.totais.atendimentos;
-            document.getElementById('conversao-total').textContent = data.totais.conversion + '%';
-            
-            const projecao = Math.round((data.totais.vendas / 3) * 7);
-            document.getElementById('projecao-semanal').textContent = projecao;
-            const percProj = ((projecao / data.totais.meta) * 100).toFixed(1);
-            document.getElementById('percentual-projecao').textContent = percProj + '%';
-            document.getElementById('progress-projecao').style.width = Math.min(percProj, 100) + '%';
 
             createVendasChart(vendedoras, vendas, metas);
             createRankingTable(data.vendedoras);
             createDetalhesTable(data.vendedoras);
-            createMetricsChart(vendedoras, atendimentos, vendas);
-            createPowerChart(vendedoras, data.vendedoras);
-            
-            if (data.rankingResort && data.rankingResort.length > 0) {
-                createResortTable(data.rankingResort);
-            }
         }
 
         function createVendasChart(vendedoras, vendas, metas) {
@@ -567,7 +699,7 @@
                 data: {
                     labels: vendedoras,
                     datasets: [{
-                        label: 'Vendas',
+                        label: 'Ventas',
                         data: vendas,
                         backgroundColor: 'rgba(0, 212, 255, 0.6)',
                         borderColor: 'rgba(0, 212, 255, 1)',
@@ -583,10 +715,21 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } }, /* Aumentado de 10 */
+                    plugins: { 
+                        legend: { 
+                            labels: { color: '#fff', font: { size: 13 } } 
+                        } 
+                    },
                     scales: {
-                        y: { beginAtZero: true, ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } }, /* Aumentado de 9 */
-                        x: { ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } } /* Aumentado de 9 */
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { color: '#fff', font: { size: 12 } }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        },
+                        x: { 
+                            ticks: { color: '#fff', font: { size: 12 } }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        }
                     }
                 }
             });
@@ -635,106 +778,13 @@
             });
         }
 
-        function createResortTable(ranking) {
-            const tbody = document.querySelector('#resort-table tbody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'];
-
-            ranking.forEach(function(item, i) {
-                tbody.innerHTML += 
-                    '<tr>' +
-                    '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
-                    '<td><strong>' + item.nome + '</strong></td>' +
-                    '<td>' + item.pontos + '</td>' +
-                    '</tr>';
-            });
-        }
-
-        function createMetricsChart(vendedoras, atendimentos, vendas) {
-            const ctx = document.getElementById('metricsChart');
-            if (!ctx) return;
-            
-            if (metricsChart) metricsChart.destroy();
-
-            const conversoes = atendimentos.map(function(at, i) {
-                return at > 0 ? ((vendas[i] / at) * 100).toFixed(2) : 0;
-            });
-
-            metricsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: vendedoras,
-                    datasets: [{
-                        label: 'Atendimentos',
-                        data: atendimentos,
-                        borderColor: 'rgba(255, 193, 7, 1)',
-                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                        yAxisID: 'y',
-                        fill: true,
-                        tension: 0.4
-                    }, {
-                        label: 'Conversão (%)',
-                        data: conversoes,
-                        borderColor: 'rgba(0, 255, 136, 1)',
-                        backgroundColor: 'rgba(0, 255, 136, 0.2)',
-                        yAxisID: 'y1',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
-                    scales: {
-                        y: { type: 'linear', position: 'left', ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y1: { type: 'linear', position: 'right', ticks: { color: '#fff', font: { size: 12 } }, grid: { drawOnChartArea: false } },
-                        x: { ticks: { color: '#fff', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } }
-                    }
-                }
-            });
-        }
-
-        function createPowerChart(vendedoras, data) {
-            const ctx = document.getElementById('powerChart');
-            if (!ctx) return;
-            
-            if (powerChart) powerChart.destroy();
-
-            const powers = data.map(function(v) { return v.power || 0; });
-
-            powerChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: vendedoras,
-                    datasets: [{
-                        label: 'Power (%)',
-                        data: powers,
-                        borderColor: 'rgba(0, 212, 255, 1)',
-                        backgroundColor: 'rgba(0, 212, 255, 0.2)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#fff', font: { size: 13 } } } },
-                    scales: {
-                        r: { 
-                            ticks: { color: '#fff', backdropColor: 'transparent', font: { size: 11 } },
-                            grid: { color: 'rgba(255,255,255,0.2)' },
-                            pointLabels: { color: '#fff', font: { size: 12 } }
-                        }
-                    }
-                }
-            });
-        }
-
         // Auto-carregar se já configurado
         window.addEventListener('load', function() {
             const apiUrl = localStorage.getItem('dashboard_api_url');
+            const interval = localStorage.getItem('dashboard_refresh_interval');
+            
+            if (interval) refreshSeconds = parseInt(interval);
+            
             if (apiUrl) {
                 document.getElementById('config-panel').classList.add('hidden');
                 document.getElementById('tv-dashboard').classList.remove('hidden');
@@ -758,4 +808,3 @@
     </script>
 </body>
 </html>
-
