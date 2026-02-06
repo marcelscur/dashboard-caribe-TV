@@ -666,19 +666,19 @@
             console.log('Business Data:', businessData); // Debug
 
             // Card 1: Ventas Totales
-            document.getElementById('ventas-totales').textContent = data.totais.vendas;
-            document.getElementById('ventas-todo').textContent = businessData['Todo para Revender'].vendas;
-            document.getElementById('ventas-caribe').textContent = businessData['Caribe Beachwear'].vendas;
-            document.getElementById('ventas-pijama').textContent = businessData['Pijama de Seda'].vendas;
+            document.getElementById('ventas-totales').textContent = Math.round(data.totais.vendas);
+            document.getElementById('ventas-todo').textContent = Math.round(businessData['Todo para Revender'].vendas);
+            document.getElementById('ventas-caribe').textContent = Math.round(businessData['Caribe Beachwear'].vendas);
+            document.getElementById('ventas-pijama').textContent = Math.round(businessData['Pijama de Seda'].vendas);
 
             // Card 2: Meta General
-            document.getElementById('meta-total').textContent = data.totais.meta;
+            document.getElementById('meta-total').textContent = Math.round(data.totais.meta);
             const percMeta = ((data.totais.vendas / data.totais.meta) * 100).toFixed(1);
             document.getElementById('percentual-meta').textContent = percMeta + '% alcanzado';
             document.getElementById('progress-meta').style.width = Math.min(percMeta, 100) + '%';
-            document.getElementById('meta-todo').textContent = businessData['Todo para Revender'].meta;
-            document.getElementById('meta-caribe').textContent = businessData['Caribe Beachwear'].meta;
-            document.getElementById('meta-pijama').textContent = businessData['Pijama de Seda'].meta;
+            document.getElementById('meta-todo').textContent = Math.round(businessData['Todo para Revender'].meta);
+            document.getElementById('meta-caribe').textContent = Math.round(businessData['Caribe Beachwear'].meta);
+            document.getElementById('meta-pijama').textContent = Math.round(businessData['Pijama de Seda'].meta);
 
             // Card 3: Proyección Semanal
             const proyeccionTotal = Math.round((data.totais.vendas / 3) * 7);
@@ -695,10 +695,10 @@
                 Math.round((businessData['Pijama de Seda'].vendas / 3) * 7);
 
             // Card 4: Atenciones
-            document.getElementById('atenciones-totales').textContent = data.totais.atendimentos;
-            document.getElementById('atenciones-todo').textContent = businessData['Todo para Revender'].atenciones;
-            document.getElementById('atenciones-caribe').textContent = businessData['Caribe Beachwear'].atenciones;
-            document.getElementById('atenciones-pijama').textContent = businessData['Pijama de Seda'].atenciones;
+            document.getElementById('atenciones-totales').textContent = Math.round(data.totais.atendimentos);
+            document.getElementById('atenciones-todo').textContent = Math.round(businessData['Todo para Revender'].atenciones);
+            document.getElementById('atenciones-caribe').textContent = Math.round(businessData['Caribe Beachwear'].atenciones);
+            document.getElementById('atenciones-pijama').textContent = Math.round(businessData['Pijama de Seda'].atenciones);
 
             // Card 5: Conversión
             const convTotal = data.totais.conversion || 
@@ -717,16 +717,16 @@
             document.getElementById('conversion-pijama').textContent = convPijama + '%';
 
             // Card 6: Pedidos Mensuales (quantidade de vendas/pedidos)
-            document.getElementById('resultado-total').textContent = data.totais.vendas;
-            document.getElementById('resultado-todo').textContent = businessData['Todo para Revender'].vendas;
-            document.getElementById('resultado-caribe').textContent = businessData['Caribe Beachwear'].vendas;
-            document.getElementById('resultado-pijama').textContent = businessData['Pijama de Seda'].vendas;
+            document.getElementById('resultado-total').textContent = Math.round(data.totais.vendas);
+            document.getElementById('resultado-todo').textContent = Math.round(businessData['Todo para Revender'].vendas);
+            document.getElementById('resultado-caribe').textContent = Math.round(businessData['Caribe Beachwear'].vendas);
+            document.getElementById('resultado-pijama').textContent = Math.round(businessData['Pijama de Seda'].vendas);
 
             // Preparar dados para gráficos
             const vendedoras = data.vendedoras.map(function(v) { return v.nome; });
-            const vendas = data.vendedoras.map(function(v) { return v.vendas; });
-            const metas = data.vendedoras.map(function(v) { return v.meta; });
-            const atendimentos = data.vendedoras.map(function(v) { return v.atendimentos || 0; });
+            const vendas = data.vendedoras.map(function(v) { return Math.round(v.vendas || 0); });
+            const metas = data.vendedoras.map(function(v) { return Math.round(v.meta || 0); });
+            const atendimentos = data.vendedoras.map(function(v) { return Math.round(v.atendimentos || 0); });
 
             console.log('Chamando funções de gráficos...'); // Debug
 
@@ -813,13 +813,15 @@
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
 
             sorted.forEach(function(v, i) {
-                const perc = v.meta > 0 ? ((v.vendas / v.meta) * 100).toFixed(1) : 0;
+                const vendas = Math.round(v.vendas || 0);
+                const meta = Math.round(v.meta || 0);
+                const perc = meta > 0 ? ((vendas / meta) * 100).toFixed(1) : 0;
                 tbody.innerHTML += 
                     '<tr>' +
                     '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
                     '<td><strong>' + v.nome + '</strong></td>' +
-                    '<td>' + v.vendas + '</td>' +
-                    '<td>' + v.meta + '</td>' +
+                    '<td>' + vendas + '</td>' +
+                    '<td>' + meta + '</td>' +
                     '<td>' + perc + '%</td>' +
                     '</tr>';
             });
@@ -836,14 +838,19 @@
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
 
             sorted.forEach(function(v, i) {
+                const vendas = Math.round(v.vendas || 0);
+                const power = parseFloat(v.power || 0).toFixed(1);
+                const conversion = parseFloat(v.conversion || 0).toFixed(1);
+                const calidad = parseFloat(v.calidad || 0).toFixed(1);
+                
                 tbody.innerHTML += 
                     '<tr>' +
                     '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
                     '<td><strong>' + v.nome + '</strong></td>' +
-                    '<td>' + v.vendas + '</td>' +
-                    '<td>' + (v.power || 0) + '%</td>' +
-                    '<td>' + (v.conversion || 0) + '%</td>' +
-                    '<td>' + (v.calidad || 0) + '%</td>' +
+                    '<td>' + vendas + '</td>' +
+                    '<td>' + power + '%</td>' +
+                    '<td>' + conversion + '%</td>' +
+                    '<td>' + calidad + '%</td>' +
                     '</tr>';
             });
         }
