@@ -87,7 +87,9 @@
         .badge-success { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
         .badge-info { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
 
-        /* Grid de 6 tarjetas */
+                .badge-warning { background: rgba(255, 193, 7, 0.20); color: #ffc107; }
+        .badge-danger { background: rgba(255, 77, 77, 0.20); color: #ff4d4d; }
+/* Grid de 6 tarjetas */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -332,7 +334,7 @@
             <div class="header-left">
                 <h1>🏖️ Dashboard Caribe Beachwear</h1>
                 <div class="status-info">
-                    <span class="status-badge badge-success">● En Vivo</span>
+                    <span class="status-badge badge-success" id="live-badge">● En Vivo</span>
                     <span class="status-badge badge-info" id="last-update">Actualizando...</span>
                 </div>
             </div>
@@ -555,6 +557,7 @@
         </div>
     </div>
 
+    
     <script>
         let vendasChart = null;
         let metricsChart = null;
@@ -563,16 +566,129 @@
         let countdownInterval = null;
         let refreshSeconds = 60;
 
+        // Cache + resiliencia
+        const CACHE_KEY = 'dashboard_cache_v1';
+        const CACHE_TS_KEY = 'dashboard_cache_ts_v1';
+        const DEFAULT_TIMEOUT_MS = 8000;
+        const MAX_RETRIES = 2; // total tentativas = 1 + MAX_RETRIES
+        const CACHE_TTL_MS_MIN = 60_000; // mínimo 1 min (pra TV não ficar piscando)
+
+        function nowHHMM() {
+            const now = new Date();
+            return now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function setStatus(mode, text) {
+            const badge = document.getElementById('live-badge');
+            const last = document.getElementById('last-update');
+            if (!badge || !last) return;
+
+            badge.classList.remove('badge-success', 'badge-info', 'badge-warning', 'badge-danger');
+
+            if (mode === 'live') {
+                badge.classList.add('badge-success');
+                badge.textContent = '● En Vivo';
+            } else if (mode === 'cached') {
+                badge.classList.add('badge-warning');
+                badge.textContent = '● Cache';
+            } else if (mode === 'error') {
+                badge.classList.add('badge-danger');
+                badge.textContent = '● Error';
+            } else {
+                badge.classList.add('badge-info');
+                badge.textContent = '● Estado';
+            }
+
+            last.textContent = text || '';
+        }
+
+        function safeNumber(v) {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function pct(part, total) {
+            const t = safeNumber(total);
+            if (t <= 0) return 0;
+            return (safeNumber(part) / t) * 100;
+        }
+
+        function getField(obj, keys, fallback = 0) {
+            if (!obj) return fallback;
+            for (const k of keys) {
+                if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+            }
+            return fallback;
+        }
+
+        async function fetchWithTimeout(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                return res;
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        async function fetchJsonWithRetry(url) {
+            let lastErr = null;
+
+            for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+                try {
+                    const res = await fetchWithTimeout(url, DEFAULT_TIMEOUT_MS);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const json = await res.json();
+                    return json;
+                } catch (err) {
+                    lastErr = err;
+                    // backoff simples: 400ms, 800ms...
+                    const wait = 400 * Math.pow(2, attempt);
+                    await new Promise(r => setTimeout(r, wait));
+                }
+            }
+            throw lastErr;
+        }
+
+        function getCacheTTLms() {
+            // TTL no mínimo 1 min e no máximo 10 min, baseado no refresh configurado
+            const ttl = Math.max(CACHE_TTL_MS_MIN, Math.min(refreshSeconds * 2000, 10 * 60_000));
+            return ttl;
+        }
+
+        function loadFromCacheIfFresh() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                const ts = safeNumber(localStorage.getItem(CACHE_TS_KEY));
+                if (!raw || !ts) return null;
+
+                const age = Date.now() - ts;
+                if (age > getCacheTTLms()) return null;
+
+                return JSON.parse(raw);
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function saveToCache(data) {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+            } catch (_) {}
+        }
+
         function saveConfig() {
             const apiUrl = document.getElementById('api-url-input').value.trim();
-            const interval = parseInt(document.getElementById('refresh-interval-input').value);
+            const interval = parseInt(document.getElementById('refresh-interval-input').value, 10);
 
             if (!apiUrl) {
                 alert('Por favor, ingrese una URL válida');
                 return;
             }
 
-            if (interval < 10 || interval > 600) {
+            if (!Number.isFinite(interval) || interval < 10 || interval > 600) {
                 alert('El intervalo debe estar entre 10 y 600 segundos');
                 return;
             }
@@ -584,7 +700,7 @@
             document.getElementById('config-panel').classList.add('hidden');
             document.getElementById('tv-dashboard').classList.remove('hidden');
 
-            loadData();
+            loadData({ preferCache: true });
             startAutoRefresh();
         }
 
@@ -593,7 +709,9 @@
             if (countdownInterval) clearInterval(countdownInterval);
 
             let countdown = refreshSeconds;
-            
+
+            document.getElementById('countdown').textContent = countdown + 's';
+
             countdownInterval = setInterval(function() {
                 countdown--;
                 if (countdown <= 0) countdown = refreshSeconds;
@@ -601,167 +719,176 @@
             }, 1000);
 
             autoRefreshInterval = setInterval(function() {
-                loadData();
+                loadData({ preferCache: false });
                 countdown = refreshSeconds;
             }, refreshSeconds * 1000);
         }
 
-        function loadData() {
+        async function loadData(opts) {
             const apiUrl = localStorage.getItem('dashboard_api_url');
-            
-            fetch(apiUrl)
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    updateDashboard(data);
-                    const now = new Date();
-                    document.getElementById('last-update').textContent = 
-                        now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                })
-                .catch(function(error) {
-                    console.error('Error al cargar datos:', error);
-                    document.getElementById('last-update').textContent = '❌ Error';
-                });
+            if (!apiUrl) return;
+
+            const preferCache = !!(opts && opts.preferCache);
+
+            // 1) Renderiza cache (se tiver) pra TV não ficar vazia
+            if (preferCache) {
+                const cached = loadFromCacheIfFresh();
+                if (cached) {
+                    updateDashboard(cached);
+                    setStatus('cached', 'Cache ' + nowHHMM());
+                } else {
+                    setStatus('info', 'Cargando...');
+                }
+            } else {
+                setStatus('info', 'Actualizando...');
+            }
+
+            // 2) Busca live com retry/timeout
+            try {
+                const data = await fetchJsonWithRetry(apiUrl);
+                saveToCache(data);
+                updateDashboard(data);
+                setStatus('live', 'Actualizado ' + nowHHMM());
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+
+                // fallback: se tiver cache mesmo que velho, usa (mas marca como cache)
+                try {
+                    const raw = localStorage.getItem(CACHE_KEY);
+                    if (raw) {
+                        const cached = JSON.parse(raw);
+                        updateDashboard(cached);
+                        setStatus('cached', 'Cache (sin red) ' + nowHHMM());
+                        return;
+                    }
+                } catch (_) {}
+
+                setStatus('error', '❌ Error ' + nowHHMM());
+            }
         }
 
         function updateDashboard(data) {
-            if (!data || !data.totais || !data.vendedoras) return;
+            if (!data || !data.totais || !Array.isArray(data.vendedoras)) return;
 
-            console.log('Dados recebidos:', data); // Debug
-
-            // Mapear vendedoras por negocio - usando nomes parciais para matching
+            // Mapear vendedoras por negocio (matching por nome)
             const businessMap = {
                 'Todo para Revender': ['steisy', 'nicole'],
                 'Caribe Beachwear': ['yendri', 'alina'],
                 'Pijama de Seda': ['wennifer', 'maibeth']
             };
 
-            // Calcular totais por negócio
             const businessData = {
-                'Todo para Revender': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 },
-                'Caribe Beachwear': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 },
-                'Pijama de Seda': { vendas: 0, meta: 0, atenciones: 0, resultado: 0 }
+                'Todo para Revender': { vendas: 0, meta: 0, atenciones: 0 },
+                'Caribe Beachwear': { vendas: 0, meta: 0, atenciones: 0 },
+                'Pijama de Seda': { vendas: 0, meta: 0, atenciones: 0 }
             };
 
-            // Processar cada vendedora
+            // Normalizar totais (aceita variações de chaves)
+            const totais = {
+                vendas: safeNumber(getField(data.totais, ['vendas', 'ventas'], 0)),
+                meta: safeNumber(getField(data.totais, ['meta'], 0)),
+                atendimentos: safeNumber(getField(data.totais, ['atendimentos', 'atendimentos', 'atenciones'], 0)),
+                conversion: safeNumber(getField(data.totais, ['conversion', 'conversao', 'conversión'], 0))
+            };
+
+            // Processar vendedoras
             data.vendedoras.forEach(function(v) {
-                const nomeLower = v.nome.toLowerCase();
-                console.log('Processando vendedora:', v.nome); // Debug
-                
+                const nome = String(getField(v, ['nome', 'nombre'], '') || '');
+                const nomeLower = nome.toLowerCase();
+
+                const vendas = safeNumber(getField(v, ['vendas', 'ventas'], 0));
+                const meta = safeNumber(getField(v, ['meta'], 0));
+                const atend = safeNumber(getField(v, ['atendimentos', 'atendimentos', 'atenciones'], 0));
+
                 for (let business in businessMap) {
-                    const found = businessMap[business].some(function(nome) {
-                        return nomeLower.includes(nome);
-                    });
-                    
+                    const found = businessMap[business].some(function(key) { return nomeLower.includes(key); });
                     if (found) {
-                        console.log(v.nome + ' -> ' + business); // Debug
-                        businessData[business].vendas += v.vendas || 0;
-                        businessData[business].meta += v.meta || 0;
-                        businessData[business].atenciones += v.atendimentos || 0;
-                        businessData[business].resultado += (v.vendas || 0) * 1500;
-                        break; // Sai do loop após encontrar
+                        businessData[business].vendas += vendas;
+                        businessData[business].meta += meta;
+                        businessData[business].atenciones += atend;
+                        break;
                     }
                 }
             });
 
-            console.log('Business Data:', businessData); // Debug
-
             // Card 1: Ventas Totales
-            document.getElementById('ventas-totales').textContent = Math.round(data.totais.vendas);
+            document.getElementById('ventas-totales').textContent = Math.round(totais.vendas);
             document.getElementById('ventas-todo').textContent = Math.round(businessData['Todo para Revender'].vendas);
             document.getElementById('ventas-caribe').textContent = Math.round(businessData['Caribe Beachwear'].vendas);
             document.getElementById('ventas-pijama').textContent = Math.round(businessData['Pijama de Seda'].vendas);
 
             // Card 2: Meta General
-            document.getElementById('meta-total').textContent = Math.round(data.totais.meta);
-            const percMeta = ((data.totais.vendas / data.totais.meta) * 100).toFixed(1);
-            document.getElementById('percentual-meta').textContent = percMeta + '% alcanzado';
+            document.getElementById('meta-total').textContent = Math.round(totais.meta);
+            const percMeta = pct(totais.vendas, totais.meta);
+            document.getElementById('percentual-meta').textContent = percMeta.toFixed(1) + '% alcanzado';
             document.getElementById('progress-meta').style.width = Math.min(percMeta, 100) + '%';
             document.getElementById('meta-todo').textContent = Math.round(businessData['Todo para Revender'].meta);
             document.getElementById('meta-caribe').textContent = Math.round(businessData['Caribe Beachwear'].meta);
             document.getElementById('meta-pijama').textContent = Math.round(businessData['Pijama de Seda'].meta);
 
-            // Card 3: Proyección Semanal
-            const proyeccionTotal = Math.round((data.totais.vendas / 3) * 7);
+            // Card 3: Proyección Semanal (base no dia atual da semana, começando segunda)
+            const weekday = (new Date().getDay() + 6) % 7 + 1; // Mon=1..Sun=7
+            const daysElapsed = Math.max(1, weekday);
+            const proyeccionTotal = Math.round((totais.vendas / daysElapsed) * 7);
             document.getElementById('proyeccion-total').textContent = proyeccionTotal;
-            const percProj = ((proyeccionTotal / data.totais.meta) * 100).toFixed(1);
-            document.getElementById('percentual-proyeccion').textContent = percProj + '% de la meta';
+            const percProj = pct(proyeccionTotal, totais.meta);
+            document.getElementById('percentual-proyeccion').textContent = percProj.toFixed(1) + '% de la meta';
             document.getElementById('progress-proyeccion').style.width = Math.min(percProj, 100) + '%';
-            
-            document.getElementById('proyeccion-todo').textContent = 
-                Math.round((businessData['Todo para Revender'].vendas / 3) * 7);
-            document.getElementById('proyeccion-caribe').textContent = 
-                Math.round((businessData['Caribe Beachwear'].vendas / 3) * 7);
-            document.getElementById('proyeccion-pijama').textContent = 
-                Math.round((businessData['Pijama de Seda'].vendas / 3) * 7);
+
+            const projBiz = function(bizName) {
+                const v = businessData[bizName].vendas;
+                return Math.round((v / daysElapsed) * 7);
+            };
+            document.getElementById('proyeccion-todo').textContent = projBiz('Todo para Revender');
+            document.getElementById('proyeccion-caribe').textContent = projBiz('Caribe Beachwear');
+            document.getElementById('proyeccion-pijama').textContent = projBiz('Pijama de Seda');
 
             // Card 4: Atenciones
-            document.getElementById('atenciones-totales').textContent = Math.round(data.totais.atendimentos);
+            document.getElementById('atenciones-totales').textContent = Math.round(totais.atendimentos);
             document.getElementById('atenciones-todo').textContent = Math.round(businessData['Todo para Revender'].atenciones);
             document.getElementById('atenciones-caribe').textContent = Math.round(businessData['Caribe Beachwear'].atenciones);
             document.getElementById('atenciones-pijama').textContent = Math.round(businessData['Pijama de Seda'].atenciones);
 
             // Card 5: Conversión
-            const convTotal = data.totais.conversion || 
-                (data.totais.atendimentos > 0 ? ((data.totais.vendas / data.totais.atendimentos) * 100).toFixed(1) : 0);
-            document.getElementById('conversion-total').textContent = convTotal + '%';
-            
-            const convTodo = businessData['Todo para Revender'].atenciones > 0 ?
-                ((businessData['Todo para Revender'].vendas / businessData['Todo para Revender'].atenciones) * 100).toFixed(1) : 0;
-            const convCaribe = businessData['Caribe Beachwear'].atenciones > 0 ?
-                ((businessData['Caribe Beachwear'].vendas / businessData['Caribe Beachwear'].atenciones) * 100).toFixed(1) : 0;
-            const convPijama = businessData['Pijama de Seda'].atenciones > 0 ?
-                ((businessData['Pijama de Seda'].vendas / businessData['Pijama de Seda'].atenciones) * 100).toFixed(1) : 0;
-            
-            document.getElementById('conversion-todo').textContent = convTodo + '%';
-            document.getElementById('conversion-caribe').textContent = convCaribe + '%';
-            document.getElementById('conversion-pijama').textContent = convPijama + '%';
+            const convTotal = totais.conversion > 0 ? totais.conversion : pct(totais.vendas, totais.atendimentos);
+            document.getElementById('conversion-total').textContent = convTotal.toFixed(1) + '%';
 
-            // Card 6: Pedidos Mensuales (quantidade de vendas/pedidos)
-            document.getElementById('resultado-total').textContent = Math.round(data.totais.vendas);
+            const convTodo = pct(businessData['Todo para Revender'].vendas, businessData['Todo para Revender'].atenciones);
+            const convCaribe = pct(businessData['Caribe Beachwear'].vendas, businessData['Caribe Beachwear'].atenciones);
+            const convPijama = pct(businessData['Pijama de Seda'].vendas, businessData['Pijama de Seda'].atenciones);
+
+            document.getElementById('conversion-todo').textContent = convTodo.toFixed(1) + '%';
+            document.getElementById('conversion-caribe').textContent = convCaribe.toFixed(1) + '%';
+            document.getElementById('conversion-pijama').textContent = convPijama.toFixed(1) + '%';
+
+            // Card 6: Pedidos Mensuales (no teu JSON tá como "vendas"; mantive, mas se tiver "pedidos" ele usa)
+            const pedidosMes = safeNumber(getField(data.totais, ['pedidosMes', 'pedidos_mes', 'pedidos'], totais.vendas));
+            document.getElementById('resultado-total').textContent = Math.round(pedidosMes);
             document.getElementById('resultado-todo').textContent = Math.round(businessData['Todo para Revender'].vendas);
             document.getElementById('resultado-caribe').textContent = Math.round(businessData['Caribe Beachwear'].vendas);
             document.getElementById('resultado-pijama').textContent = Math.round(businessData['Pijama de Seda'].vendas);
 
             // Preparar dados para gráficos
-            const vendedoras = data.vendedoras.map(function(v) { return v.nome; });
-            const vendas = data.vendedoras.map(function(v) { return Math.round(v.vendas || 0); });
-            const metas = data.vendedoras.map(function(v) { return Math.round(v.meta || 0); });
-            const atendimentos = data.vendedoras.map(function(v) { return Math.round(v.atendimentos || 0); });
+            const vendedoras = data.vendedoras.map(function(v) { return String(getField(v, ['nome', 'nombre'], '')); });
+            const vendas = data.vendedoras.map(function(v) { return Math.round(safeNumber(getField(v, ['vendas', 'ventas'], 0))); });
+            const metas = data.vendedoras.map(function(v) { return Math.round(safeNumber(getField(v, ['meta'], 0))); });
+            const atendimentos = data.vendedoras.map(function(v) { return Math.round(safeNumber(getField(v, ['atendimentos', 'atendimentos', 'atenciones'], 0))); });
 
-            console.log('Chamando funções de gráficos...'); // Debug
-
-            // Atualizar todos os gráficos e tabelas
             createVendasChart(vendedoras, vendas, metas);
-            console.log('✓ createVendasChart executado'); // Debug
-            
             createRankingTable(data.vendedoras);
-            console.log('✓ createRankingTable executado'); // Debug
-            
             createDetalhesTable(data.vendedoras);
-            console.log('✓ createDetalhesTable executado'); // Debug
-            
             createMetricsChart(vendedoras, atendimentos, vendas);
-            console.log('✓ createMetricsChart executado'); // Debug
-            
             createPowerChart(vendedoras, data.vendedoras);
-            console.log('✓ createPowerChart executado'); // Debug
-            
-            // Atualizar tabela de resort se existir
-            if (data.rankingResort && data.rankingResort.length > 0) {
-                console.log('Dados de resort encontrados:', data.rankingResort); // Debug
+
+            if (Array.isArray(data.rankingResort) && data.rankingResort.length > 0) {
                 createResortTable(data.rankingResort);
-                console.log('✓ createResortTable executado'); // Debug
-            } else {
-                console.log('⚠ Dados de resort não encontrados ou vazios'); // Debug
             }
-            
-            console.log('Todos os gráficos e tabelas atualizados!'); // Debug
         }
 
         function createVendasChart(vendedoras, vendas, metas) {
             const ctx = document.getElementById('vendasChart');
             if (!ctx) return;
-            
+
             if (vendasChart) vendasChart.destroy();
 
             vendasChart = new Chart(ctx, {
@@ -785,20 +912,20 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            labels: { color: '#fff', font: { size: 13 } } 
-                        } 
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff', font: { size: 13 } }
+                        }
                     },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { color: '#fff', font: { size: 12 } }, 
-                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff', font: { size: 12 } },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
                         },
-                        x: { 
-                            ticks: { color: '#fff', font: { size: 12 } }, 
-                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        x: {
+                            ticks: { color: '#fff', font: { size: 12 } },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
                         }
                     }
                 }
@@ -807,19 +934,23 @@
 
         function createRankingTable(vendedoras) {
             const tbody = document.querySelector('#ranking-table tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            const sorted = vendedoras.slice().sort(function(a, b) { return b.vendas - a.vendas; });
+            const sorted = vendedoras.slice().sort(function(a, b) {
+                return safeNumber(getField(b, ['vendas', 'ventas'], 0)) - safeNumber(getField(a, ['vendas', 'ventas'], 0));
+            });
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
 
             sorted.forEach(function(v, i) {
-                const vendas = Math.round(v.vendas || 0);
-                const meta = Math.round(v.meta || 0);
-                const perc = meta > 0 ? ((vendas / meta) * 100).toFixed(1) : 0;
-                tbody.innerHTML += 
+                const nome = String(getField(v, ['nome', 'nombre'], ''));
+                const vendas = Math.round(safeNumber(getField(v, ['vendas', 'ventas'], 0)));
+                const meta = Math.round(safeNumber(getField(v, ['meta'], 0)));
+                const perc = meta > 0 ? ((vendas / meta) * 100).toFixed(1) : '0.0';
+                tbody.innerHTML +=
                     '<tr>' +
                     '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
-                    '<td><strong>' + v.nome + '</strong></td>' +
+                    '<td><strong>' + nome + '</strong></td>' +
                     '<td>' + vendas + '</td>' +
                     '<td>' + meta + '</td>' +
                     '<td>' + perc + '%</td>' +
@@ -829,24 +960,26 @@
 
         function createDetalhesTable(vendedoras) {
             const tbody = document.querySelector('#detalhes-table tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            const sorted = vendedoras.slice().sort(function(a, b) { 
-                return (b.power || 0) - (a.power || 0); 
+            const sorted = vendedoras.slice().sort(function(a, b) {
+                return safeNumber(getField(b, ['power'], 0)) - safeNumber(getField(a, ['power'], 0));
             });
-            
+
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
 
             sorted.forEach(function(v, i) {
-                const vendas = Math.round(v.vendas || 0);
-                const power = parseFloat(v.power || 0).toFixed(1);
-                const conversion = parseFloat(v.conversion || 0).toFixed(1);
-                const calidad = parseFloat(v.calidad || 0).toFixed(1);
-                
-                tbody.innerHTML += 
+                const nome = String(getField(v, ['nome', 'nombre'], ''));
+                const vendas = Math.round(safeNumber(getField(v, ['vendas', 'ventas'], 0)));
+                const power = safeNumber(getField(v, ['power'], 0)).toFixed(1);
+                const conversion = safeNumber(getField(v, ['conversion', 'conversao', 'conversión'], 0)).toFixed(1);
+                const calidad = safeNumber(getField(v, ['calidad', 'qualidade'], 0)).toFixed(1);
+
+                tbody.innerHTML +=
                     '<tr>' +
                     '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
-                    '<td><strong>' + v.nome + '</strong></td>' +
+                    '<td><strong>' + nome + '</strong></td>' +
                     '<td>' + vendas + '</td>' +
                     '<td>' + power + '%</td>' +
                     '<td>' + conversion + '%</td>' +
@@ -857,19 +990,14 @@
 
         function createMetricsChart(vendedoras, atendimentos, vendas) {
             const ctx = document.getElementById('metricsChart');
-            console.log('createMetricsChart chamado - ctx:', ctx); // Debug
-            if (!ctx) {
-                console.error('Canvas metricsChart não encontrado!');
-                return;
-            }
-            
+            if (!ctx) return;
+
             if (metricsChart) metricsChart.destroy();
 
             const conversoes = atendimentos.map(function(at, i) {
-                return at > 0 ? ((vendas[i] / at) * 100).toFixed(2) : 0;
+                const a = safeNumber(at);
+                return a > 0 ? ((safeNumber(vendas[i]) / a) * 100).toFixed(2) : 0;
             });
-
-            console.log('Dados Metrics:', { vendedoras, atendimentos, conversoes }); // Debug
 
             metricsChart = new Chart(ctx, {
                 type: 'line',
@@ -896,27 +1024,27 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            labels: { color: '#fff', font: { size: 13 } } 
-                        } 
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff', font: { size: 13 } }
+                        }
                     },
                     scales: {
-                        y: { 
-                            type: 'linear', 
-                            position: 'left', 
-                            ticks: { color: '#fff', font: { size: 12 } }, 
-                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            ticks: { color: '#fff', font: { size: 12 } },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
                         },
-                        y1: { 
-                            type: 'linear', 
-                            position: 'right', 
-                            ticks: { color: '#fff', font: { size: 12 } }, 
-                            grid: { drawOnChartArea: false } 
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            ticks: { color: '#fff', font: { size: 12 } },
+                            grid: { drawOnChartArea: false }
                         },
-                        x: { 
-                            ticks: { color: '#fff', font: { size: 12 } }, 
-                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        x: {
+                            ticks: { color: '#fff', font: { size: 12 } },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
                         }
                     }
                 }
@@ -925,16 +1053,11 @@
 
         function createPowerChart(vendedoras, data) {
             const ctx = document.getElementById('powerChart');
-            console.log('createPowerChart chamado - ctx:', ctx); // Debug
-            if (!ctx) {
-                console.error('Canvas powerChart não encontrado!');
-                return;
-            }
-            
+            if (!ctx) return;
+
             if (powerChart) powerChart.destroy();
 
-            const powers = data.map(function(v) { return v.power || 0; });
-            console.log('Dados Power:', { vendedoras, powers }); // Debug
+            const powers = data.map(function(v) { return safeNumber(getField(v, ['power'], 0)); });
 
             powerChart = new Chart(ctx, {
                 type: 'radar',
@@ -951,17 +1074,17 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            labels: { color: '#fff', font: { size: 13 } } 
-                        } 
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff', font: { size: 13 } }
+                        }
                     },
                     scales: {
-                        r: { 
-                            ticks: { 
-                                color: '#fff', 
-                                backdropColor: 'transparent', 
-                                font: { size: 11 } 
+                        r: {
+                            ticks: {
+                                color: '#fff',
+                                backdropColor: 'transparent',
+                                font: { size: 11 }
                             },
                             grid: { color: 'rgba(255,255,255,0.2)' },
                             pointLabels: { color: '#fff', font: { size: 12 } }
@@ -973,43 +1096,41 @@
 
         function createResortTable(ranking) {
             const tbody = document.querySelector('#resort-table tbody');
-            console.log('createResortTable chamado - tbody:', tbody, 'ranking:', ranking); // Debug
-            if (!tbody) {
-                console.error('Tabela resort-table tbody não encontrada!');
-                return;
-            }
-            
+            if (!tbody) return;
+
             tbody.innerHTML = '';
             const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'];
 
             ranking.forEach(function(item, i) {
-                tbody.innerHTML += 
+                const nome = String(getField(item, ['nome', 'name'], ''));
+                const pontos = Math.round(safeNumber(getField(item, ['pontos', 'points'], 0)));
+                tbody.innerHTML +=
                     '<tr>' +
                     '<td><span class="medal">' + (medals[i] || (i + 1)) + '</span></td>' +
-                    '<td><strong>' + item.nome + '</strong></td>' +
-                    '<td>' + item.pontos + '</td>' +
+                    '<td><strong>' + nome + '</strong></td>' +
+                    '<td>' + pontos + '</td>' +
                     '</tr>';
             });
-            
-            console.log('Tabela resort preenchida com', ranking.length, 'itens'); // Debug
         }
 
         // Auto-carregar se já configurado
         window.addEventListener('load', function() {
             const apiUrl = localStorage.getItem('dashboard_api_url');
             const interval = localStorage.getItem('dashboard_refresh_interval');
-            
-            if (interval) refreshSeconds = parseInt(interval);
-            
+
+            if (interval) refreshSeconds = parseInt(interval, 10);
+
             if (apiUrl) {
                 document.getElementById('config-panel').classList.add('hidden');
                 document.getElementById('tv-dashboard').classList.remove('hidden');
-                loadData();
+                loadData({ preferCache: true });
                 startAutoRefresh();
+            } else {
+                // Deixa a configuração visível
+                setStatus('info', 'Configurar API');
             }
         });
 
-        // Limpar ao fechar
         window.addEventListener('beforeunload', function() {
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             if (countdownInterval) clearInterval(countdownInterval);
@@ -1022,5 +1143,6 @@
             }
         });
     </script>
+
 </body>
 </html>
